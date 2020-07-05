@@ -1,0 +1,21 @@
+# Config sample. Remove .template and fill the values
+config:
+  live_port: 1935 # rtmp entry point port
+  streamers: # a list of nginx locations for several streamers (overridden via cli)
+    - dude1
+    - dude2
+  live_streamer: dude1 # who's live atm (overridden via cli) 
+  endpoints:
+    common_rtmp:
+      active: True # Enable/disable rtmp services
+      urls:
+        - endpoint: rtmp://<your stream 1 endpoint> # no / in the end
+          key: <your stream 1 key>
+        - endpoint: rtmp://<your stream 2 endpoint> # no / in the end
+          key: <your stream 2 key>
+    facebook:
+      active: True # Enable/disable facebook (rtmps). Currently only fb supported here
+      endpoint: rtmps://live-api-s.facebook.com:443/rtmp/ # facebook has uniformal endpoint for all streams
+      keys:
+        - <your fb stream 1 key>
+        - <your fb stream 2 key>

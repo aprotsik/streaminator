@@ -1,0 +1,16 @@
+# Project exclude paths
+/venv/
+.python-version
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+.pytest_cache
+
+# IDE
+.vscode
+.idea
+.env
+
+# logs and binary files
+*.log

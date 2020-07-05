@@ -1,0 +1,22 @@
+version: '3.7'
+services:
+  nginx:
+    image: aprotsik/nginx-rtmp:0.5.0
+    ports:
+      - 8080:8080
+      - ${NGINX_LIVE_PORT}:${NGINX_LIVE_PORT}
+    environment:
+      RTMP_STREAM_NAMES: ${STREAMERS}
+      LIVE_STREAMER: ${LIVE_STREAMER}
+      RTMP_PUSH_URLS: ${NGINX_RTMP_PUSH_URLS}
+      LIVE_PORT: ${NGINX_LIVE_PORT}
+    restart: always
+  stunnel:
+    image: aprotsik/stunnel:0.4.0
+    environment:
+      FB_STREAM_COUNT: ${STUNNEL_FB_STREAM_COUNT}
+      CLIENT: ${STUNNEL_CLIENT}
+      SERVICE: ${STUNNEL_SERVICE}
+      ACCEPT: ${STUNNEL_ACCEPT}
+      CONNECT: ${STUNNEL_CONNECT}
+    restart: always
