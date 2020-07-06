@@ -1,5 +1,6 @@
 # Streaminator
 ![alt text](https://github.com/aprotsik/streaminator/blob/master/streaminator.jpg)  
+
 Docker/AWS app for re-streaming to multiple platforms. Able to listen to multiple streams simultaneously. Allows switching live streamers almost seamlessly.
 
 ## Development state
