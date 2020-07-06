@@ -2,7 +2,11 @@
 Docker/AWS app for re-streaming to multiple platforms. Able to listen to multiple streams simultaneously. Allows switching live streamers almost seamlessly.
 
 ## Development state
-Works fully locally. Can be put in the cloud manually. AWS orchestration code is WIP
+Works fully locally. Can be put in the cloud manually. AWS orchestration code is WIP.  
+App currently relies on  
+https://hub.docker.com/repository/docker/aprotsik/nginx-rtmp  
+https://hub.docker.com/repository/docker/aprotsik/stunnel  
+which are kinda forks from other containers which I've slightly changed. This will remain so for a while. I intend to refactor those in future and commit proper dockerfiles to this repo.
 
 ## Requirements
 1. Pyton 3
