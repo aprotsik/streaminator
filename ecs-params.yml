@@ -1,0 +1,9 @@
+version: 1
+task_definition:
+  services:
+    nginx:
+      cpu_shares: 100
+      mem_limit: 500000000
+    stunnel:
+      cpu_shares: 100
+      mem_limit: 500000000

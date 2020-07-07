@@ -1,22 +1,22 @@
-version: '3.7'
+version: '3'
 services:
   nginx:
     image: aprotsik/nginx-rtmp:0.5.0
     ports:
       - 8080:8080
-      - ${NGINX_LIVE_PORT}:${NGINX_LIVE_PORT}
+      - 1935:1935
     environment:
-      RTMP_STREAM_NAMES: ${STREAMERS}
-      LIVE_STREAMER: ${LIVE_STREAMER}
-      RTMP_PUSH_URLS: ${NGINX_RTMP_PUSH_URLS}
-      LIVE_PORT: ${NGINX_LIVE_PORT}
+      RTMP_STREAM_NAMES: redspark,abyss
+      LIVE_STREAMER: redspark
+      RTMP_PUSH_URLS: rtmp://stream3.vkuserlive.com:443/vlive.629724.eyJuIjoiRFhFd1BLQlpacnciLCJhIjoibGl2ZSIsInNuIjoiYVdROVJGaEZkMUJMUWxwYWNuY21jMmxuYmoxNlluWjFTVXB2Y3pOdVUzVjBUM1YxZEVsd2NIWlJQVDA9IiwidXIiOjc2NTY3NzQsInQiOjE1OTM5NDEyNjN9/DXEwPKBZZrw,rtmp://stream3.vkuserlive.com:443/vlive.616826.eyJuIjoiNDNHbFBPdFprcnciLCJhIjoibGl2ZSIsInNuIjoiYVdROU5ETkhiRkJQZEZwcmNuY21jMmxuYmoxTlRIZ3dWVzU1V0hscVUyNTZkRFpWUnpBNGJYWkJQVDA9IiwidXIiOjc2NTY3NzQsInQiOjE1OTM5NTc0Mjl9/43GlPOtZkrw,rtmp://a.rtmp.youtube.com/live2/u202-eugx-889c-sjcw-89za
+      LIVE_PORT: 1935
     restart: always
   stunnel:
     image: aprotsik/stunnel:0.4.0
     environment:
-      FB_STREAM_COUNT: ${STUNNEL_FB_STREAM_COUNT}
-      CLIENT: ${STUNNEL_CLIENT}
-      SERVICE: ${STUNNEL_SERVICE}
-      ACCEPT: ${STUNNEL_ACCEPT}
-      CONNECT: ${STUNNEL_CONNECT}
+      FB_STREAM_COUNT: 1
+      CLIENT: "yes"
+      SERVICE: fb-live
+      ACCEPT: 19350
+      CONNECT: live-api-s.facebook.com:443
     restart: always

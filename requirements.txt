@@ -1,7 +1,4 @@
-awacs==0.9.8
 awscli==1.18.93
 boto3==1.14.16
-sceptre==2.3.0
-troposphere==2.6.1
 click==7.1.2
 PyYAML==5.3.1
