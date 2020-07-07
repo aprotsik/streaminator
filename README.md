@@ -1,20 +1,20 @@
 # Streaminator
 ![alt text](https://github.com/aprotsik/streaminator/blob/master/streaminator.jpg)  
 
-Docker/AWS app for re-streaming to multiple platforms. Able to listen to multiple streams simultaneously. Allows switching live streamers almost seamlessly.
+Docker/AWS app for re-streaming to multiple platforms. Able to listen to multiple streams simultaneously. Allows switching live streamers almost seamlessly. Can run both locally and in AWS. With default values aims for AWS free-tier and almost no costs for running in the cloud.
 
 ## Development state
-Works fully locally. Can be put in the cloud manually.
+Works fully locally and in AWS.
 App currently relies on  
 https://hub.docker.com/repository/docker/aprotsik/nginx-rtmp  
 https://hub.docker.com/repository/docker/aprotsik/stunnel  
 which are kinda forks from other containers which I've slightly changed. This will remain so for a while. I intend to refactor those in future and commit proper dockerfiles to this repo.
 
 ## Requirements
-1. Pyton 3
+1. pyton 3
 2. pip
-3. Docker
-4. Docker-compose
+3. docker
+4. docker-compose
 5. ecs-cli (for use in AWS)
 
 ## OS support
