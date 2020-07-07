@@ -49,6 +49,6 @@ Given that you already installed python, pip, docker and docker-compose.
 ```python streaminator.py switch-cloud -l dude2```
 6. When you're done, stop the service:  
 ```python streaminator.py stop-cloud```  
-7. You can see streaming stats on <cloud-host>:8080/stat
+7. You can see streaming stats on <cloud_host>:8080/stat
 
 
