@@ -31,7 +31,7 @@ Given that you already installed python, pip, docker and docker-compose.
 You can also override streamers list and live streamer (the person that is broadcasting atm) via cmd option.  
 ```python streaminator.py -s dude1,dude2 -l dude1``` This means there will be two locations for dude1 and dude2 (<your_host>/dude1 and <your_host>/dude2) and dude1 will be broadcasting live. App will receive stream from dude2, but won't broadcast it anywahere.
 5. When you need to switch the streamer use:  
-```python streaminator.py switch -l dude2``` This will put dude2 live. dude2 will still be able to stream to server, but won't be live anywhere. (!!!IMPORTANT!!! Enable connection retry in your broadcasting software as switch causes a very short downtime and you'll be disconnected. Retry will re-connect you on the fly)
+```python streaminator.py restart -l dude2``` This will put dude2 live. dude2 will still be able to stream to server, but won't be live anywhere. (!!!IMPORTANT!!! Enable connection retry in your broadcasting software as switch causes a very short downtime and you'll be disconnected. Retry will re-connect you on the fly)
 6. When you're done, stop the service:  
 ```python streaminator.py stop```
 7. You can see streaming stats on <your_host>:8080/stat
@@ -46,7 +46,7 @@ Given that you already installed python, pip, docker and docker-compose.
 4. Start the app:  
 ```python streaminator.py start-cloud``` Same options are available for config override: --live and --streamers (see about for details). In addition there's also region and instance settings (--region ot -r and --instance or -i) for choosing AWS region and instance size (!!! WARNING !!! Anything greater than t2.micro will cost you money). If you choose something other than t2.micro don't forget to tweak ecs-params.yml. Once the app is started you'll get the list of endpoints for each streamer.  
 5. When you need to switch the streamer use:  
-```python streaminator.py switch-cloud -l dude2```
+```python streaminator.py restart-cloud -l dude2```
 6. When you're done, stop the service:  
 ```python streaminator.py stop-cloud```  
 7. You can see streaming stats on <cloud_host>:8080/stat
