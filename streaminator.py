@@ -4,6 +4,7 @@ import os
 import shutil
 import re
 import boto3
+import time
 
 
 @click.group()
@@ -36,15 +37,22 @@ def stop():
     os.system('docker-compose stop')
 
 @main.command()
-@click.option('--live', '-l')
-def switch(live):
+@click.option('--live', '-l', default=False)
+@click.option('--streamers', '-s', default=False)
+@click.option('--temp-rtmp', '-tr', default=False)
+@click.option('--temp-fb', '-tf', default=False)
+def restart(streamers, live, temp_rtmp, temp_fb):
     """
-    Switches streamer to given name
+    Restarts streaminator applying the config
     """
 
-    print(f'Switching live streamer to {live}...')
-    __set_env(live=live)
-    os.system('docker-compose stop && docker-compose up -d')
+    print('Stopping streaminator...')
+    __set_env(streamers=streamers, live=live, temp_rtmp=temp_rtmp, temp_fb=temp_fb)
+    os.system('docker-compose stop')
+    print('Starting streaminator...')
+    if live:
+        print(f'Changing live streamer to {live}...')
+    os.system('docker-compose up -d')
 
 @main.command()
 @click.option('--live', '-l', default=False)
@@ -64,11 +72,13 @@ def start_cloud(streamers, live, region, instance_size):
 
     waiter = ec2.get_waiter('instance_status_ok')
 
-    __prepare_compose_cloud(streamers=streamers, live=live)
+    __prepare_compose_cloud(streamers=streamers, live=live, cloud=True)
     os.system(f'ecs-cli configure --cluster streaminator --default-launch-type EC2 --config-name streaminator --region {region}')
     if ecs.describe_clusters(clusters=['streaminator'])['clusters'][0]['status'] != 'ACTIVE':
         print('Getting cloud infrastructure up...')
         os.system(f'ecs-cli up --capability-iam --size 1 --instance-type {instance_size} --cluster-config streaminator --aws-profile streaminator')
+        print('Waiting for cloud instance to become available...')
+        time.sleep(5)
         ecs_instance = ec2.describe_instances(
             Filters=[
             {
@@ -99,7 +109,6 @@ def start_cloud(streamers, live, region, instance_size):
                 'IpRanges': [{'CidrIp': '0.0.0.0/0'}]}
             ]
         )
-        print('Waiting for cloud instance to become available...')
         waiter.wait(
             InstanceIds = [
                     ecs_instance['Reservations'][0]['Instances'][0]['InstanceId']
@@ -110,14 +119,17 @@ def start_cloud(streamers, live, region, instance_size):
 
     if ecs.describe_clusters(clusters=['streaminator'])['clusters'][0]['runningTasksCount'] == 0:
         print('Starting streaminator in the cloud...')
-        os.system('ecs-cli compose up --create-log-groups --cluster-config streaminator --aws-profile streaminator')
+        os.system('ecs-cli compose up --cluster-config streaminator --aws-profile streaminator')
         ip_address = __get_cloud_ip()
         print('Cloud endpoints for streamers are:')
         for streamer in os.environ['STREAMERS'].split(','):
             print(f'rtmp://{ip_address}:{os.environ["NGINX_LIVE_PORT"]}/{streamer}')
+        print('See stream stats at:')
+        print(f'http://{ip_address}:8080/stat')
         print(f'Initial live streamer is {os.environ["LIVE_STREAMER"]}')
     else:
         print('Streaminator already running')
+    shutil.copy2('docker-compose-backup.yml','docker-compose.yml')
 
 @main.command()
 def stop_cloud():
@@ -128,14 +140,19 @@ def stop_cloud():
     os.system('ecs-cli down --force --cluster-config streaminator --aws-profile streaminator')
 
 @main.command()
-@click.option('--live', '-l')
-def switch_cloud(live):
+@click.option('--live', '-l', default=False)
+@click.option('--streamers', '-s', default=False)
+@click.option('--temp-rtmp', '-tr', default=False)
+@click.option('--temp-fb', '-tf', default=False)
+def restart_cloud(streamers, live, temp_rtmp, temp_fb):
     """
-    Switches streamer to given name in AWS
+    Restarts streaminator running in the cloud applying the config
     """
 
-    print(f'Switching live streamer to {live}...')
-    __prepare_compose_cloud(live=live)
+    print('Re-starting streaminator in the cloud...')
+    __prepare_compose_cloud(streamers=streamers, live=live, temp_rtmp=temp_rtmp, temp_fb=temp_fb, cloud=True)
+    if live:
+        print(f'Changing live streamer to {live}...')
     os.system('ecs-cli compose up --create-log-groups --cluster-config streaminator --aws-profile streaminator')
     shutil.copy2('docker-compose-backup.yml','docker-compose.yml')
 
@@ -185,13 +202,18 @@ def __parse_config():
 
     return conf
 
-def __set_env(streamers=False, live=False):
+def __set_env(streamers=False, live=False, temp_rtmp=False, temp_fb=False, cloud=False):
     """
     Sets needed env vars
     """
+
     app_conf = __parse_config()
 
     # Pretty ugly code to transfer beautiful settings from config into container env vars
+    if cloud:
+        stunnel_host = 'localhost'
+    else:
+        stunnel_host = 'streaminator_stunnel_1'
     if streamers:
         os.environ['STREAMERS'] = streamers
     else:
@@ -201,21 +223,26 @@ def __set_env(streamers=False, live=False):
     else:
         os.environ['LIVE_STREAMER'] = app_conf['config']['live_streamer']
     rtmp_urls = ''
+    if temp_rtmp:
+            rtmp_urls += temp_rtmp
     if app_conf['config']['endpoints']['common_rtmp']['active']:
         for service in app_conf['config']['endpoints']['common_rtmp']['urls']:
-            if app_conf['config']['endpoints']['common_rtmp']['urls'].index(service) != 0:
+            if app_conf['config']['endpoints']['common_rtmp']['urls'].index(service) != 0 or temp_rtmp:
                 rtmp_urls += ','
             rtmp_urls += service['endpoint'] + '/' + service['key']
     fb_stream_count = 1
     fb_urls = ''
     stunnel_start_port = 19350
     stunnel_port = stunnel_start_port
+    if temp_fb:
+        fb_urls += 'rtmp://' + stunnel_host + ':' + str(stunnel_port) + '/' + 'rtmp' + '/' + temp_fb
+        stunnel_port += 1
     if app_conf['config']['endpoints']['facebook']['active']:
         for key in app_conf['config']['endpoints']['facebook']['keys']:
-            if app_conf['config']['endpoints']['facebook']['keys'].index(key) != 0:
+            if app_conf['config']['endpoints']['facebook']['keys'].index(key) != 0 or temp_fb:
                 fb_urls += ','
                 fb_stream_count += 1
-            fb_urls += 'rtmp://' + 'streaminator_stunnel_1' + ':' + str(stunnel_port) + '/' + 'rtmp' + '/' + key
+            fb_urls += 'rtmp://' + stunnel_host + ':' + str(stunnel_port) + '/' + 'rtmp' + '/' + key
             stunnel_port += 1
     os.environ['STUNNEL_FB_STREAM_COUNT'] = str(fb_stream_count)
     os.environ['NGINX_RTMP_PUSH_URLS'] = ''
@@ -231,12 +258,12 @@ def __set_env(streamers=False, live=False):
 
     return ['STREAMERS', 'LIVE_STREAMER', 'STUNNEL_FB_STREAM_COUNT', 'NGINX_RTMP_PUSH_URLS', 'NGINX_LIVE_PORT', 'STUNNEL_CLIENT', 'STUNNEL_SERVICE', 'STUNNEL_ACCEPT', 'STUNNEL_CONNECT']
 
-def __prepare_compose_cloud(streamers=False, live=False):
+def __prepare_compose_cloud(streamers=False, live=False, temp_rtmp=False, temp_fb=False, cloud=False):
     """
     AWS ECS Cli doesn't support env vars inside compose file. This function prepares compose file for ecs cli.
     """
 
-    env_vars_list = __set_env(streamers=streamers, live=live)
+    env_vars_list = __set_env(streamers=streamers, live=live, temp_rtmp=temp_rtmp, temp_fb=temp_fb, cloud=cloud)
 
     shutil.copy2('docker-compose.yml','docker-compose-backup.yml')
     with open('docker-compose.yml', 'r+') as f:
@@ -251,4 +278,8 @@ def __prepare_compose_cloud(streamers=False, live=False):
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        shutil.copy2('docker-compose-backup.yml','docker-compose.yml')
+        raise
