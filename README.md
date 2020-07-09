@@ -1,7 +1,7 @@
 # Streaminator
 ![alt text](https://github.com/aprotsik/streaminator/blob/master/streaminator.jpg)  
 
-Docker/AWS app for re-streaming to multiple platforms. Able to listen to multiple streams simultaneously. Allows switching live streamers almost seamlessly. Can run both locally and in AWS. With default values aims for AWS free-tier and almost no costs for running in the cloud.
+Docker/AWS app for re-streaming to multiple platforms and central streaming management. Able to listen to multiple streams simultaneously. Allows switching live streamers almost seamlessly. Can run both locally and in AWS. With default values aims for AWS free-tier and almost no costs for running in the cloud.
 
 ## Development state
 Works fully locally and in AWS.
