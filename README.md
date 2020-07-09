@@ -13,8 +13,8 @@ which are kinda forks from other containers which I've slightly changed. This wi
 ## Requirements
 1. pyton 3
 2. pip
-3. docker
-4. docker-compose
+3. docker (for local use)
+4. docker-compose (for local use)
 5. ecs-cli (for use in AWS)
 
 ## OS support
