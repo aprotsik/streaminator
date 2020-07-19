@@ -11,7 +11,7 @@ https://hub.docker.com/repository/docker/aprotsik/stunnel
 which are kinda forks from other containers which I've slightly changed. This will remain so for a while. I intend to refactor those in future and commit proper dockerfiles to this repo.
 
 ## Requirements
-1. pyton 3.8
+1. python 3.8
 2. pip
 3. docker (for local use)
 4. docker-compose (for local use)
